@@ -20,9 +20,9 @@ affiliation = st.sidebar.selectbox(
 )
 user_name = st.sidebar.text_input("Name")
 
-# Define all columns based on the provided table structure
+# Define all columns (Added "Customer" at the beginning)
 columns = [
-    "Product", "POL", "POD(Original)", "POD(Changed)", "Change Reason", 
+    "Customer", "Product", "POL", "POD(Original)", "POD(Changed)", "Change Reason", 
     "Vessel Name", "Carrier", "Sea", "Arrived(before unloading)", "Terminal", 
     "CY", "In Transit", "Delivered", "ETA", "ATA", "Lead Time", 
     "Delivery Plan", "Total Cost"
@@ -42,7 +42,6 @@ if affiliation and user_name:
         st.warning("🔒 Logged in with Management access. Data viewing and downloading only.")
         
         st.markdown("### 📥 Download Current Data")
-        # Buffer for full log data download
         log_buffer = io.BytesIO()
         with pd.ExcelWriter(log_buffer, engine='openpyxl') as writer:
             st.session_state.log_data.to_excel(writer, index=False, sheet_name='Monitoring_Data')
@@ -92,11 +91,9 @@ if affiliation and user_name:
                     current_ksa_time = datetime.now(saudi_tz).strftime("%Y-%m-%d %H:%M:%S")
                     updater_info = f"{affiliation} - {user_name}"
                     
-                    # Insert auto-generated logs to the uploaded data
                     df_uploaded.insert(0, "Update Time(KSA)", current_ksa_time)
                     df_uploaded.insert(1, "Updater Info", updater_info)
                     
-                    # Merge with existing data
                     st.session_state.log_data = pd.concat([df_uploaded, st.session_state.log_data], ignore_index=True)
                     st.success(f"✅ {len(df_uploaded)} records successfully uploaded! (Log Time: {current_ksa_time})")
                 except Exception as e:
@@ -113,6 +110,8 @@ if affiliation and user_name:
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
+                # Customer 필드 추가
+                customer = st.text_input("Customer")
                 product = st.text_input("Product")
                 pol = st.text_input("POL")
                 pod_origin = st.text_input("POD (Original)")
@@ -120,7 +119,6 @@ if affiliation and user_name:
                 
             with col2:
                 change_reason = st.selectbox("Change Reason", ["EOV", "COD"])
-                # "Ship back" 옵션 추가됨
                 delivery_plan = st.selectbox(
                     "Delivery Plan", 
                     ["Not decided", "Feeder", "Bonded(transit clearance)", "CC & Transloading", "Ship back"]
@@ -150,6 +148,7 @@ if affiliation and user_name:
                 new_entry = {
                     "Update Time(KSA)": current_ksa_time,
                     "Updater Info": updater_info,
+                    "Customer": customer,  # Customer 데이터 저장 추가
                     "Product": product,
                     "POL": pol,
                     "POD(Original)": pod_origin,
