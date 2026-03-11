@@ -20,7 +20,7 @@ affiliation = st.sidebar.selectbox(
 )
 user_name = st.sidebar.text_input("Name")
 
-# Define all columns (Added "Customer" at the beginning)
+# Define all columns
 columns = [
     "Customer", "Product", "POL", "POD(Original)", "POD(Changed)", "Change Reason", 
     "Vessel Name", "Carrier", "Sea", "Arrived(before unloading)", "Terminal", 
@@ -55,7 +55,8 @@ if affiliation and user_name:
         )
         
         st.markdown("---")
-        st.markdown("### 📊 Update History Log")
+        st.markdown("### 📊 Update History Log (Read-only)")
+        # Management는 읽기 전용 표 제공
         st.dataframe(st.session_state.log_data, use_container_width=True)
         
     else:
@@ -110,7 +111,6 @@ if affiliation and user_name:
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
-                # Customer 필드 추가
                 customer = st.text_input("Customer")
                 product = st.text_input("Product")
                 pol = st.text_input("POL")
@@ -148,7 +148,7 @@ if affiliation and user_name:
                 new_entry = {
                     "Update Time(KSA)": current_ksa_time,
                     "Updater Info": updater_info,
-                    "Customer": customer,  # Customer 데이터 저장 추가
+                    "Customer": customer,
                     "Product": product,
                     "POL": pol,
                     "POD(Original)": pod_origin,
@@ -175,10 +175,18 @@ if affiliation and user_name:
         st.markdown("---")
         
         # ---------------------------------------------------------
-        # 4. Comprehensive Monitoring Dashboard
+        # 4. Comprehensive Monitoring Dashboard (Editable)
         # ---------------------------------------------------------
-        st.markdown("### 📊 Update History Log")
-        st.dataframe(st.session_state.log_data, use_container_width=True)
+        st.markdown("### 📊 Update History Log (Editable)")
+        st.info("💡 You can edit cells directly in the table below. You can also add or delete rows using the UI.")
+        
+        # st.dataframe을 st.data_editor로 변경하여 엑셀처럼 인라인 수정 가능하게 설정
+        st.session_state.log_data = st.data_editor(
+            st.session_state.log_data,
+            use_container_width=True,
+            num_rows="dynamic", # 행 추가 및 삭제 가능
+            key="data_editor"
+        )
 
 else:
     st.info("👈 Please select your department and enter your name in the sidebar to start.")
